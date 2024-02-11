@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use rusty_time::Timer;
 
-use crate::{frame::Drawable, NUM_COLS};
+use crate::{frame::Drawable, NUM_COLS, NUM_ROWS};
 
 pub struct Invader {
     pub x: usize,
@@ -27,7 +27,7 @@ impl Invaders {
                         .collect::<Vec<_>>()
                 })
                 .collect(),
-            move_timer: Timer::new(Duration::from_millis(2000)),
+            move_timer: Timer::new(Duration::from_millis(200)),
             direction: 1,
         }
     }
@@ -67,6 +67,27 @@ impl Invaders {
                     invader.x = invader.x.saturating_add_signed(self.direction as isize);
                 });
             }
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn all_killed(&self) -> bool {
+        self.army.is_empty()
+    }
+
+    pub fn reached_bottom(&self) -> bool {
+        self.army.iter().map(|invader| invader.y).max().unwrap_or(0) >= NUM_ROWS - 1
+    }
+
+    pub fn kill_invader_at(&mut self, x: usize, y: usize) -> bool {
+        if let Some(idx) = self
+            .army
+            .iter()
+            .position(|invader| (invader.x == x) && (invader.y == y))
+        {
+            self.army.remove(idx);
             true
         } else {
             false
